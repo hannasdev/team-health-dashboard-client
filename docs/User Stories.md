@@ -40,7 +40,7 @@ Acceptance Criteria:
 - ESLint and Prettier are configured and working
 - Pre-commit hooks are set up and functioning
 
-### 4. Testing Framework Setup (Story Points: 3)
+### 4. Testing Framework Setup (Story Points: 3) - [DONE]
 
 4.1. Install Jest and React Testing Library
 4.2. Configure Jest for TypeScript support
