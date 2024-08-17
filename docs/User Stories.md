@@ -52,7 +52,7 @@ Acceptance Criteria:
 - Jest and React Testing Library are installed and configured
 - Sample test passes successfully
 
-### 5. CI Configuration (Story Points: 3)
+### 5. CI Configuration (Story Points: 3) - [DONE]
 
 5.1. Set up GitHub Actions for CI
 5.2. Configure build job in CI pipeline
