@@ -2,7 +2,7 @@
 
 ## Epic 1: Setup Project (Priority: High)
 
-### 1. Project Initialization (Story Points: 3)
+### 1. Project Initialization (Story Points: 3) - [DONE]
 
 1.1. Set up a new Vite project with React and TypeScript
 1.2. Initialize Git repository
