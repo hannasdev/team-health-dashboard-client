@@ -75,7 +75,7 @@ Acceptance Criteria:
 - API proxy is working in development
 - Hot reloading is functioning correctly
 
-### 7. Core Application Setup (Story Points: 5)
+### 7. Core Application Setup (Story Points: 5) - [DONE]
 
 7.1. Create basic App component
 7.2. Set up routing structure
