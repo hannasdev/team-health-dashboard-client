@@ -28,7 +28,7 @@ Acceptance Criteria:
 - All dependencies are installed and properly configured
 - Package.json is updated with the correct versions
 
-### 3. Linting and Formatting Setup (Story Points: 2)
+### 3. Linting and Formatting Setup (Story Points: 2) - [DONE]
 
 3.1. Install ESLint and necessary plugins
 3.2. Configure ESLint for React and TypeScript
