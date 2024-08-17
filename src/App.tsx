@@ -8,7 +8,17 @@ import { Login } from './pages/Login';
 
 const queryClient = new QueryClient();
 
-function App() {
+async function App() {
+  try {
+    await fetch('/health') // Vite will proxy this request to your backend
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      });
+  } catch (error) {
+    console.error(error);
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalStyle />
