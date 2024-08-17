@@ -1,0 +1,29 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x' # Use your preferred Node.js version
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build # Assuming your build script is "npm run build"
+
+      - name: Run Tests
+        run: npm run test # Assuming your test script is "npm run test"
