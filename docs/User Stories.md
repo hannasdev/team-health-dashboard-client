@@ -14,7 +14,7 @@ Acceptance Criteria:
 - Git repository is initialized with a .gitignore file
 - Project structure is created and documented
 
-### 2. Dependency Installation (Story Points: 2)
+### 2. Dependency Installation (Story Points: 2) - [DONE]
 
 2.1. Install and configure React Router
 2.2. Install and set up Material-UI
