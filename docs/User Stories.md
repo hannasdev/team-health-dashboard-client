@@ -63,7 +63,7 @@ Acceptance Criteria:
 - GitHub Actions workflow is created and functioning
 - CI pipeline successfully builds and tests the project
 
-### 6. Development Environment Setup (Story Points: 2)
+### 6. Development Environment Setup (Story Points: 2) - [DONE]
 
 6.1. Set up environment variables
 6.2. Configure proxy for API requests during development
