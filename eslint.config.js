@@ -59,8 +59,19 @@ export default tseslint.config(
           checksVoidReturn: false,
         },
       ],
-      'no-unused-vars': ['error', { varsIgnorePattern: 'React' }],
-      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: 'React' }],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_', // Ignore variables starting with an underscore
+          varsIgnorePattern: '^_', // Ignore variables starting with an underscore
+          caughtErrors: 'none', // Ignore unused catch variables
+        },
+      ],
+      '@typescript-eslint/unbound-method': 'off',
     },
     settings: {
       react: {

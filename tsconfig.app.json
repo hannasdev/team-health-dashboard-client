@@ -20,7 +20,8 @@
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "verbatimModuleSyntax": true,
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "noImplicitThis": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

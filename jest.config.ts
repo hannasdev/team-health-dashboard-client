@@ -8,7 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        tsconfig: './tsconfig.app.json',
+        tsconfig: './tsconfig.test.json',
         jsx: 'react-jsx',
       },
     ],
@@ -17,6 +17,7 @@ const jestConfig: JestConfigWithTsJest = {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__ mocks __/fileMock.js',
   },
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  transformIgnorePatterns: ['/node_modules/(?!punycode)'],
 };
 
 export default jestConfig;
