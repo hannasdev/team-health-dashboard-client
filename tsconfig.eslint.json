@@ -1,9 +1,9 @@
 {
+  "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "allowJs": true,
     "strictNullChecks": true
   },
-  "extends": "./tsconfig.json",
-  "include": ["src/**/*", "*.ts", "*.tsx"],
+  "include": ["src/**/*", "*.ts", "*.tsx", "*.js", "*.jsx"],
   "exclude": ["node_modules", "dist"]
 }

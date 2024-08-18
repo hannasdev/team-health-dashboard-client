@@ -9,13 +9,14 @@ const jestConfig: JestConfigWithTsJest = {
       'ts-jest',
       {
         tsconfig: './tsconfig.app.json',
-        jsx: 'react',
+        jsx: 'react-jsx',
       },
     ],
   },
   moduleNameMapper: {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__ mocks __/fileMock.js',
   },
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
 };
 
 export default jestConfig;
