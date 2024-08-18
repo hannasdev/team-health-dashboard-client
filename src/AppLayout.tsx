@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { AppBar, Toolbar, Typography, Box, Link } from '@mui/material';
 
 const pages = ['Dashboard', 'Register', 'Login', 'Health Check'];
