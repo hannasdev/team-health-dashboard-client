@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GlobalStyle from './styles/globalStyles';
@@ -8,8 +7,16 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { HealthCheck } from './pages/HealthCheck';
 import AppLayout from './AppLayout';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 
 function App() {
   return (
@@ -25,6 +32,7 @@ function App() {
           </Routes>
         </AppLayout>
       </Router>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
