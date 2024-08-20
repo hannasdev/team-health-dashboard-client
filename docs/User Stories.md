@@ -89,7 +89,7 @@ Acceptance Criteria:
 - Placeholder pages are created and accessible
 - Basic layout components are implemented
 
-### 8. API Integration Setup (Story Points: 3)
+### 8. API Integration Setup (Story Points: 3) - [DONE]
 
 8.1. Create API service module
 8.2. Set up authentication service
@@ -101,7 +101,7 @@ Acceptance Criteria:
 - Authentication service is set up
 - React Query is configured for API calls
 
-### 9. State Management Setup (Story Points: 2)
+### 9. State Management Setup (Story Points: 2) - [REDUNDANT]
 
 9.1. Set up context for global state (if needed)
 9.2. Configure React Query for server state management
@@ -111,7 +111,7 @@ Acceptance Criteria:
 - Global state management is implemented if required
 - React Query is configured for server state management
 
-### 10. Styling and Theming (Story Points: 3)
+### 10. Styling and Theming (Story Points: 3) - [REDUNDANT]
 
 10.1. Set up Material-UI theme
 10.2. Create global styles

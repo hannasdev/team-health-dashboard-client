@@ -49,7 +49,6 @@ Our frontend application will interact with the Team Health Dashboard backend AP
 - React Query: Fetch metrics data, potentially with SSE integration
 - Recharts: Visualize metrics data
 - Material-UI: Layout components, cards for metrics display
-- Styled Components: Custom styling for dashboard elements
 - Custom SSE hook: Real-time updates for metrics
 
 ### Health Check Page
@@ -82,11 +81,6 @@ src/
 ├── services/
 │   ├── api.ts
 │   └── auth.ts
-├── store/
-│   ├── slices/
-│   │   ├── authSlice.ts
-│   │   └── metricsSlice.ts
-│   └── store.ts
 ├── hooks/
 │   ├── useMetrics.ts
 │   └── ...
@@ -108,13 +102,12 @@ src/
 - React with TypeScript
 - Routing: React Router
 - UI Component Library: Material-UI (MUI)
-- Data Fetching: React Query
+- Data Fetching and Server State Management: React Query
 - Charts and Visualizations: Recharts
 - Form Handling: React Hook Form
 - Testing: Jest and React Testing Library
 - Build Tool: Vite
 - Linting and Formatting: ESLint and Prettier
-- CSS-in-JS: Styled Components
 
 Here's a breakdown of each choice and its motivation:
 
@@ -133,6 +126,7 @@ Allows for easy navigation between different views of the dashboard.
 Offers a comprehensive set of pre-built, customizable React components.
 Ensures a consistent, modern look and feel across the application.
 Provides responsive design out of the box.
+Includes a robust theming system for customization.
 
 ### State Management
 
@@ -146,6 +140,7 @@ Local State: Managed by React's useState and useContext
 
 - UI state (e.g., open/closed modals, selected tabs)
 - Form inputs (leveraging React Hook Form)
+- Any necessary global state (e.g., user preferences)
 
 ### Recharts
 
@@ -174,10 +169,43 @@ Provides an excellent developer experience with fast hot module replacement.
 ESLint ensures code quality and consistency.
 Prettier automatically formats code, reducing style-related discussions.
 
-### Styled Components
+## Styling and Theming
 
-Allows writing CSS in JavaScript, promoting component-based styling.
-Supports dynamic styling based on props and theme.
+We will use Material-UI's built-in theming system for consistent styling across the application. This approach provides several benefits:
+
+- Centralized theme configuration
+- Easy customization of component styles
+- Support for light/dark mode and other theme variations
+- Consistent look and feel across the application
+
+### Theme Configuration
+
+The main theme will be defined in `src/styles/theme.ts`. This file will export a theme object created using MUI's `createTheme` function. The theme will include:
+
+- Custom color palette
+- Typography settings
+- Component style overrides
+- Responsive breakpoints
+
+### Global Styles
+
+Global styles will be defined in `src/styles/globalStyles.ts`. These styles will be applied using MUI's `GlobalStyles` component and will include:
+
+- Reset CSS
+- Base styles for HTML elements
+- Any other global styles needed across the application
+
+### Component Styling
+
+For component-specific styling, we will primarily use MUI's `sx` prop. This allows for easy, theme-aware styling directly in components. For more complex components, we may use MUI's `makeStyles` hook to create reusable styles.
+
+### Theme Provider
+
+The MUI `ThemeProvider` component will be used to wrap the entire application, making the theme available to all components. This will be set up in the `App.tsx` or `AppLayout.tsx` file.
+
+### Dynamic Theming
+
+If required, we will implement theme switching (e.g., light/dark mode) using React state and MUI's theming system. This can be achieved by creating separate theme objects for each mode and switching between them based on user preference.
 
 ## Error Handling & Logging
 
@@ -204,10 +232,10 @@ Implement a global error handler to catch and log uncaught exceptions.
 Example of error handling with React Query:
 
 ```typescript
-const { data, error, isLoading } = useQuery("metrics", fetchMetrics, {
+const { data, error, isLoading } = useApiQuery('metrics', fetchMetrics, {
   onError: (error) => {
     logError(error);
-    showErrorNotification("Failed to fetch metrics. Please try again later.");
+    showErrorNotification('Failed to fetch metrics. Please try again later.');
   },
 });
 ```
@@ -322,7 +350,7 @@ Example of a fallback strategy in a component:
 
 ```typescript
 function Dashboard() {
-  const { data, error, isLoading } = useQuery("metrics", fetchMetrics);
+  const { data, error, isLoading } = useApiQuery("metrics", fetchMetrics);
 
   if (isLoading) return <SkeletonLoader />;
   if (error) return <ErrorMessage error={error} retry={() => refetch()} />;
