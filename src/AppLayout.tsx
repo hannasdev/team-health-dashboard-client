@@ -1,13 +1,13 @@
-import type { ReactNode } from 'react';
 import { AppBar, Toolbar, Typography, Box, Link } from '@mui/material';
+import type { IAppLayoutProps } from './interfaces';
+import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const pages = ['Dashboard', 'Register', 'Login', 'Health Check'];
 
-interface AppLayoutProps {
-  children: ReactNode;
-}
+const AppLayout: React.FC<IAppLayoutProps> = ({ children }) => {
+  const navigate = useNavigate();
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar position="static">
@@ -19,15 +19,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </Typography>
           <Box>
             {pages.map((page) => (
-              <Link
+              <Button
                 key={page}
-                href={`/${page.toLowerCase()}`} // Adjust routing if needed
+                onClick={() => {
+                  navigate(`/${page.toLowerCase().replace(' ', '')}`);
+                }}
                 color="inherit"
-                underline="none"
                 sx={{ margin: '0 16px' }}
               >
                 {page}
-              </Link>
+              </Button>
             ))}
           </Box>
         </Toolbar>
