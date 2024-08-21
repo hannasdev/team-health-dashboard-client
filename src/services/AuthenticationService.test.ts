@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
 import { AuthenticationService } from './AuthenticationService';
 import type { IAuthResponse, IUser, IStorageService } from '../interfaces';
 
@@ -56,7 +56,7 @@ describe('AuthenticationService', () => {
       expect(mockStorage.getItem('token')).toBe('test-token');
       expect(mockStorage.getItem('refreshToken')).toBe('test-refresh-token');
     } catch (error) {
-      throw Error(error);
+      throw Error(error as string);
     }
   });
 
