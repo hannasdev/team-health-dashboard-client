@@ -1,8 +1,11 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
+    "composite": true,
     "allowJs": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*", "*.ts", "*.tsx", "*.js", "*.jsx"],
   "exclude": ["node_modules", "dist"]
