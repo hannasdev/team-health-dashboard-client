@@ -123,11 +123,11 @@ Acceptance Criteria:
 - Global styles are created
 - Styled Components theme provider is set up
 
-### 11. Error Handling and Logging Setup (Story Points: 3)
+### 11. Error Handling and Logging Setup (Story Points: 3) - [DONE]
 
 11.1. Create error boundary component
 11.2. Set up global error handler
-11.3. Configure logging service (e.g., Sentry) for production
+11.3. Configure logging service (e.g., Sentry) for production - Skipped for now
 
 Acceptance Criteria:
 
