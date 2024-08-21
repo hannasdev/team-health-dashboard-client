@@ -1,13 +1,17 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import GlobalStyle from './styles/globalStyles';
-import { Dashboard } from './pages/Dashboard';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { HealthCheck } from './pages/HealthCheck';
 import AppLayout from './AppLayout';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { useGlobalErrorHandler } from './hooks/useGlobalErrorHandler';
+import { Suspense, lazy } from 'react';
+import { CircularProgress } from '@mui/material';
+import NotFound from './pages/NotFound';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const HealthCheck = lazy(() => import('./pages/HealthCheck'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,17 +23,25 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  useGlobalErrorHandler((error) => {
+    console.error('Global error:', error);
+    // Add logic to show a user-friendly error message
+    // Log the error to your error reporting service here
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
-      <GlobalStyle />
       <Router>
         <AppLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/healthcheck" element={<HealthCheck />} />
-          </Routes>
+          <Suspense fallback={<CircularProgress />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/healthcheck" element={<HealthCheck />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </AppLayout>
       </Router>
       <ReactQueryDevtools initialIsOpen={false} />

@@ -1,6 +1,6 @@
 import { useHealthCheck } from '../hooks/useQuery';
 
-export const HealthCheck = () => {
+const HealthCheck = () => {
   const { status, isLoading, error } = useHealthCheck();
 
   if (isLoading) return <div>Loading...</div>;
@@ -8,3 +8,5 @@ export const HealthCheck = () => {
 
   return <div>HealthCheck {JSON.stringify(status)}</div>;
 };
+
+export default HealthCheck;
