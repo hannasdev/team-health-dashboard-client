@@ -1,13 +1,15 @@
 // src/__ tests __/App.test.tsx
-import '@testing-library/jest-dom';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 
-test('demo', () => {
-  expect(true).toBe(true);
-});
-
-test('Renders the main page', () => {
+test('Renders the main page', async () => {
   render(<App />);
-  expect(true).toBeTruthy();
+
+  // Wait for and assert on an element that should be present after any initial loading
+  await waitFor(() => {
+    expect(screen.getByText(/Team Health Logo/i)).toBeInTheDocument();
+  });
+
+  // Additional assertions can go here
+  expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
 });
