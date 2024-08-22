@@ -1,98 +1,72 @@
-import type { AxiosInstance } from 'axios';
 import { AuthenticationService } from './AuthenticationService';
-import type { IAuthResponse, IUser, IStorageService } from '../interfaces';
-
-// Mock IStorageService to control storage behavior in tests
-class MockStorageService implements IStorageService {
-  private storage: { [key: string]: string } = {};
-
-  getItem(key: string): string | null {
-    return this.storage[key] || null;
-  }
-
-  setItem(key: string, value: string): void {
-    this.storage[key] = value;
-  }
-
-  removeItem(key: string): void {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this.storage[key];
-  }
-}
+import type { IAuthResponse, IUser } from '../interfaces';
 
 describe('AuthenticationService', () => {
   let authService: AuthenticationService;
-  let mockApiClient: AxiosInstance;
-  let mockStorage: MockStorageService;
+  let mockApiClient: any;
+  let mockStorage: any;
 
   beforeEach(() => {
-    // Create mock instances before each test
-    mockApiClient = {} as AxiosInstance; // You don't need to mock all of AxiosInstance
-    mockStorage = new MockStorageService();
+    mockApiClient = {
+      post: jest.fn(),
+      get: jest.fn(),
+    };
+    mockStorage = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+    };
     authService = new AuthenticationService(mockApiClient, mockStorage);
   });
 
   it('should login successfully and store tokens', async () => {
-    const mockUser: IUser = { id: '1', name: 'Test User', email: 'test@example.com' };
+    const mockUser: IUser = { id: '1', email: 'test@example.com', name: 'Test User' };
     const mockResponse: IAuthResponse = {
       user: mockUser,
-      token: 'test-token',
+      accessToken: 'test-access-token',
       refreshToken: 'test-refresh-token',
     };
 
-    // Mock the API response
-    mockApiClient.post = jest.fn().mockResolvedValue({ data: mockResponse });
+    mockApiClient.post.mockResolvedValue({ data: mockResponse });
 
-    // Call the login function
-    try {
-      const authResponse = await authService.login('test@example.com', 'password');
+    const authResponse = await authService.login('test@example.com', 'password');
 
-      // Assertions
-      expect(mockApiClient.post).toHaveBeenCalledWith('/auth/login', {
-        email: 'test@example.com',
-        password: 'password',
-      });
-      expect(authResponse).toEqual(mockResponse);
-      expect(mockStorage.getItem('token')).toBe('test-token');
-      expect(mockStorage.getItem('refreshToken')).toBe('test-refresh-token');
-    } catch (error) {
-      throw Error(error as string);
-    }
+    expect(mockApiClient.post).toHaveBeenCalledWith('/auth/login', {
+      email: 'test@example.com',
+      password: 'password',
+    });
+    expect(authResponse).toEqual(mockResponse);
+    expect(mockStorage.setItem).toHaveBeenCalledWith('accessToken', 'test-access-token');
+    expect(mockStorage.setItem).toHaveBeenCalledWith('refreshToken', 'test-refresh-token');
   });
 
   it('should register a new user and store tokens', async () => {
-    const mockUser: IUser = { id: '1', name: 'New User', email: 'newuser@example.com' };
+    const mockUser: IUser = { id: '1', email: 'newuser@example.com', name: 'New User' };
     const mockResponse: IAuthResponse = {
       user: mockUser,
-      token: 'new-token',
+      accessToken: 'new-access-token',
       refreshToken: 'new-refresh-token',
     };
 
-    mockApiClient.post = jest.fn().mockResolvedValue({ data: mockResponse });
+    mockApiClient.post.mockResolvedValue({ data: mockResponse });
 
-    const authResponse = await authService.register('New User', 'newuser@example.com', 'password');
+    const authResponse = await authService.register('newuser@example.com', 'password');
 
     expect(mockApiClient.post).toHaveBeenCalledWith('/auth/register', {
-      name: 'New User',
       email: 'newuser@example.com',
       password: 'password',
     });
     expect(authResponse).toEqual(mockResponse);
-    expect(mockStorage.getItem('token')).toBe('new-token');
-    expect(mockStorage.getItem('refreshToken')).toBe('new-refresh-token');
+    expect(mockStorage.setItem).toHaveBeenCalledWith('accessToken', 'new-access-token');
+    expect(mockStorage.setItem).toHaveBeenCalledWith('refreshToken', 'new-refresh-token');
   });
 
   it('should log out and remove tokens from storage', () => {
-    // Set up: Store mock tokens in the mock storage
-    mockStorage.setItem('token', 'test-token');
-    mockStorage.setItem('refreshToken', 'test-refresh-token');
-
-    // Call the logout method
     authService.logout();
 
     // Assertions
-    expect(mockStorage.getItem('token')).toBeNull();
-    expect(mockStorage.getItem('refreshToken')).toBeNull();
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('accessToken');
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('refreshToken');
   });
 
   it('should get the current user', async () => {
@@ -115,31 +89,39 @@ describe('AuthenticationService', () => {
   });
 
   it('should refresh the token', async () => {
-    mockStorage.setItem('refreshToken', 'test-refresh-token');
-    const mockResponse = { token: 'new-access-token' };
-    mockApiClient.post = jest.fn().mockResolvedValue({ data: mockResponse });
+    mockStorage.getItem.mockReturnValue('test-refresh-token');
+    mockApiClient.post.mockResolvedValue({
+      data: {
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      },
+    });
 
-    const newToken = await authService.refreshToken();
+    const result = await authService.refreshToken();
 
     expect(mockApiClient.post).toHaveBeenCalledWith('/auth/refresh', {
       refreshToken: 'test-refresh-token',
     });
-    expect(mockStorage.getItem('token')).toBe('new-access-token');
-    expect(newToken).toBe('new-access-token');
+    expect(mockStorage.setItem).toHaveBeenCalledWith('accessToken', 'new-access-token');
+    expect(mockStorage.setItem).toHaveBeenCalledWith('refreshToken', 'new-refresh-token');
+    expect(result).toEqual({
+      accessToken: 'new-access-token',
+      refreshToken: 'new-refresh-token',
+    });
   });
 
   it('should handle errors during token refresh and log the user out', async () => {
-    mockStorage.setItem('refreshToken', 'test-refresh-token');
-    mockApiClient.post = jest.fn().mockRejectedValue(new Error('Refresh error'));
+    mockStorage.getItem.mockReturnValue('test-refresh-token');
+    mockApiClient.post.mockRejectedValue(new Error('Refresh error'));
 
-    const newToken = await authService.refreshToken();
+    const result = await authService.refreshToken();
 
     expect(mockApiClient.post).toHaveBeenCalledWith('/auth/refresh', {
       refreshToken: 'test-refresh-token',
     });
-    expect(mockStorage.getItem('token')).toBeNull(); // Check if logged out
-    expect(mockStorage.getItem('refreshToken')).toBeNull(); // Check if logged out
-    expect(newToken).toBeNull();
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('accessToken');
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('refreshToken');
+    expect(result).toBeNull();
   });
 
   it('should return null if refreshToken is not available in storage', async () => {

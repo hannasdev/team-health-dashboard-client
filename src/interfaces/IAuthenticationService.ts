@@ -6,5 +6,5 @@ export interface IAuthenticationService {
   register(name: string, email: string, password: string): Promise<IAuthResponse>;
   logout(): void;
   getCurrentUser(): Promise<IUser | null>;
-  refreshToken(): Promise<string | null>;
+  refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null>;
 }

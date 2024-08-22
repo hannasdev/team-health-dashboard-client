@@ -15,26 +15,25 @@ export class AuthenticationService implements IAuthenticationService {
       email,
       password,
     });
-    const { user, token, refreshToken } = response.data;
-    this.storageService.setItem('token', token);
+    const { user, accessToken, refreshToken } = response.data;
+    this.storageService.setItem('accessToken', accessToken);
     this.storageService.setItem('refreshToken', refreshToken);
-    return { user, token, refreshToken };
+    return { user, accessToken, refreshToken };
   }
 
-  public async register(name: string, email: string, password: string): Promise<IAuthResponse> {
-    const response: AxiosResponse<IAuthResponse> = await this.apiClient.post('/auth/register', {
-      name,
+  public async register(email: string, password: string): Promise<IAuthResponse> {
+    const response = await this.apiClient.post<IAuthResponse>('/auth/register', {
       email,
       password,
     });
-    const { user, token, refreshToken } = response.data;
-    this.storageService.setItem('token', token);
+    const { user, accessToken, refreshToken } = response.data;
+    this.storageService.setItem('accessToken', accessToken);
     this.storageService.setItem('refreshToken', refreshToken);
-    return { user, token, refreshToken };
+    return { user, accessToken, refreshToken };
   }
 
   public logout(): void {
-    this.storageService.removeItem('token');
+    this.storageService.removeItem('accessToken');
     this.storageService.removeItem('refreshToken');
   }
 
@@ -47,21 +46,20 @@ export class AuthenticationService implements IAuthenticationService {
     }
   }
 
-  public async refreshToken(): Promise<string | null> {
-    try {
-      const refreshToken = this.storageService.getItem('refreshToken');
-      if (!refreshToken) return null;
+  public async refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
+    const currentRefreshToken = this.storageService.getItem('refreshToken');
+    if (!currentRefreshToken) return null;
 
-      const response: AxiosResponse<{ token: string }> = await this.apiClient.post(
+    try {
+      const response = await this.apiClient.post<{ accessToken: string; refreshToken: string }>(
         '/auth/refresh',
-        {
-          refreshToken,
-        }
+        { refreshToken: currentRefreshToken }
       );
-      const { token } = response.data;
-      this.storageService.setItem('token', token);
-      return token;
-    } catch {
+      const { accessToken, refreshToken } = response.data;
+      this.storageService.setItem('accessToken', accessToken);
+      this.storageService.setItem('refreshToken', refreshToken);
+      return { accessToken, refreshToken };
+    } catch (error) {
       this.logout();
       return null;
     }

@@ -2,6 +2,6 @@ import type { IUser } from './IUser';
 
 export interface IAuthResponse {
   user: IUser;
-  token: string;
+  accessToken: string;
   refreshToken: string;
 }
