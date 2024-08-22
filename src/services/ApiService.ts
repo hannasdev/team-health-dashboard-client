@@ -117,4 +117,8 @@ export class ApiService implements IApiClient {
       throw error;
     }
   }
+
+  public getAxiosInstance(): AxiosInstance {
+    return this.api;
+  }
 }
