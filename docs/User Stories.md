@@ -135,7 +135,7 @@ Acceptance Criteria:
 - Global error handler is implemented
 - Logging service is configured for production use
 
-### 12. Performance Monitoring Setup (Story Points: 3)
+### 12. Performance Monitoring Setup (Story Points: 3) - [SKIPPED]
 
 12.1. Set up performance measurement tools
 12.2. Configure Real User Monitoring (RUM)
@@ -145,7 +145,7 @@ Acceptance Criteria:
 - Performance measurement tools are set up
 - RUM is configured and collecting data
 
-### 13. Accessibility Setup (Story Points: 2)
+### 13. Accessibility Setup (Story Points: 2) - [SKIPPED]
 
 13.1. Install and configure aXe for accessibility testing
 13.2. Set up initial accessibility tests
@@ -181,7 +181,7 @@ Acceptance Criteria:
 
 ## Epic 2: Feature Delivery (Priority: High)
 
-### User Story 1: User Registration (Priority: High, Story Points: 5)
+### User Story 1: User Registration (Priority: High, Story Points: 5) - [DONE]
 
 As a new user, I want to register for an account so that I can access the dashboard.
 
