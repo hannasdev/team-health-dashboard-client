@@ -9,6 +9,7 @@ import { LocalStorageService } from '../../services/LocalStorageService';
 import { ApiService } from '../../services/ApiService';
 import { Link as RouterLink } from 'react-router-dom';
 import { Link as MuiLink } from '@mui/material';
+import { LoggingService } from '../../services/LoggingService';
 
 type RegisterInputs = {
   name: string;
@@ -31,7 +32,7 @@ const RegisterForm: React.FC = () => {
     '/api',
     {
       handleError: (error) => {
-        console.error('API Error:', error);
+        LoggingService.error('API Error:', error);
       },
     },
     {
@@ -40,7 +41,7 @@ const RegisterForm: React.FC = () => {
         localStorageService.setItem('token', token);
       },
       refreshToken: async () => {
-        console.log('Token refresh not implemented yet');
+        LoggingService.log('Token refresh not implemented yet');
         return Promise.resolve('');
       },
     }
@@ -49,7 +50,8 @@ const RegisterForm: React.FC = () => {
 
   const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
     try {
-      await authService.register(data.name, data.email, data.password);
+      // ! Not using name for now
+      await authService.register(data.email, data.password);
       setSuccess(true);
       setTimeout(() => {
         navigate('/');
@@ -61,7 +63,7 @@ const RegisterForm: React.FC = () => {
       } else {
         setError('An unexpected error occurred. Please try again.');
       }
-      console.error('Registration error:', err);
+      LoggingService.error('Registration error:', err);
     }
   };
 
@@ -74,7 +76,7 @@ const RegisterForm: React.FC = () => {
         message="Registration successful! Redirecting to dashboard..."
       />
 
-      <TextField
+      {/* <TextField
         margin="normal"
         required
         fullWidth
@@ -89,7 +91,7 @@ const RegisterForm: React.FC = () => {
         })}
         error={!!errors.name}
         helperText={errors.name?.message}
-      />
+      /> */}
       <TextField
         margin="normal"
         required
