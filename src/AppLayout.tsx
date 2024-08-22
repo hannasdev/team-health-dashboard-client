@@ -1,12 +1,41 @@
-import { AppBar, Toolbar, Typography, Box, Link } from '@mui/material';
+// src/components/AppLayout.tsx
+
+import { AppBar, Toolbar, Typography, Box, Link, Button } from '@mui/material';
 import type { IAppLayoutProps } from './interfaces';
-import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { AuthenticationService } from './services/AuthenticationService';
+import { ApiService } from './services/ApiService';
+import { LocalStorageService } from './services/LocalStorageService';
 
 const pages = ['Dashboard', 'Register', 'Login', 'Health Check'];
 
 const AppLayout: React.FC<IAppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
+  const localStorageService = new LocalStorageService();
+  const apiService = new ApiService(
+    '/api',
+    {
+      handleError: (error) => {
+        console.error('API Error:', error);
+      },
+    },
+    {
+      getToken: () => localStorageService.getItem('token'),
+      setToken: (token) => {
+        localStorageService.setItem('token', token);
+      },
+      refreshToken: async () => {
+        // Implement token refresh logic here
+        return Promise.resolve('');
+      },
+    }
+  );
+  const authService = new AuthenticationService(apiService.getAxiosInstance(), localStorageService);
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -30,12 +59,15 @@ const AppLayout: React.FC<IAppLayoutProps> = ({ children }) => {
                 {page}
               </Button>
             ))}
+            <Button onClick={handleLogout} color="inherit" sx={{ margin: '0 16px' }}>
+              Logout
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        {children} {/* This is where the page content will go */}
+        {children}
       </Box>
     </Box>
   );

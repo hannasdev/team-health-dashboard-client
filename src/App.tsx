@@ -7,6 +7,7 @@ import { useGlobalErrorHandler } from './hooks/useGlobalErrorHandler';
 import { Suspense, lazy } from 'react';
 import { CircularProgress } from '@mui/material';
 import NotFound from './pages/NotFound';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
@@ -35,10 +36,24 @@ function App() {
         <AppLayout>
           <Suspense fallback={<CircularProgress />}>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/healthcheck" element={<HealthCheck />} />
+              <Route
+                path="/healthcheck"
+                element={
+                  <ProtectedRoute>
+                    <HealthCheck />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
