@@ -1,41 +1,33 @@
-// src/components/AppLayout.tsx
-
+import React, { useCallback } from 'react';
 import { AppBar, Toolbar, Typography, Box, Link, Button } from '@mui/material';
-import type { IAppLayoutProps } from './interfaces';
 import { useNavigate } from 'react-router-dom';
-import { AuthenticationService } from './services/AuthenticationService';
-import { ApiService } from './services/ApiService';
-import { LocalStorageService } from './services/LocalStorageService';
+import { useAuth } from './hooks/useAuth';
+import { useIdleTimeout } from './hooks/useIdleTimeout';
 
-const pages = ['Dashboard', 'Register', 'Login', 'Health Check'];
+interface IAppLayoutProps {
+  children: React.ReactNode;
+}
+
+const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+const PUBLIC_PAGES = ['Health Check'] as const;
+const AUTHENTICATED_PAGES = ['Dashboard'] as const;
+const UNAUTHENTICATED_PAGES = ['Register', 'Login'] as const;
 
 const AppLayout: React.FC<IAppLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
-  const localStorageService = new LocalStorageService();
-  const apiService = new ApiService(
-    '/api',
-    {
-      handleError: (error) => {
-        console.error('API Error:', error);
-      },
-    },
-    {
-      getToken: () => localStorageService.getItem('token'),
-      setToken: (token) => {
-        localStorageService.setItem('token', token);
-      },
-      refreshToken: async () => {
-        // Implement token refresh logic here
-        return Promise.resolve('');
-      },
-    }
-  );
-  const authService = new AuthenticationService(apiService.getAxiosInstance(), localStorageService);
+  const { isLoggedIn, logout } = useAuth();
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-  };
+  useIdleTimeout(IDLE_TIMEOUT, logout);
+
+  const pages = [...PUBLIC_PAGES, ...(isLoggedIn ? AUTHENTICATED_PAGES : UNAUTHENTICATED_PAGES)];
+
+  const handleNavigation = useCallback(
+    (page: string) => {
+      navigate(page === 'Dashboard' ? '/' : `/${page.toLowerCase().replace(' ', '')}`);
+    },
+    [navigate]
+  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -51,17 +43,20 @@ const AppLayout: React.FC<IAppLayoutProps> = ({ children }) => {
               <Button
                 key={page}
                 onClick={() => {
-                  navigate(`/${page.toLowerCase().replace(' ', '')}`);
+                  handleNavigation(page);
                 }}
                 color="inherit"
-                sx={{ margin: '0 16px' }}
+                sx={{ margin: '0 8px' }}
+                aria-label={`Navigate to ${page}`}
               >
                 {page}
               </Button>
             ))}
-            <Button onClick={handleLogout} color="inherit" sx={{ margin: '0 16px' }}>
-              Logout
-            </Button>
+            {isLoggedIn && (
+              <Button onClick={logout} color="inherit" sx={{ margin: '0 8px' }} aria-label="Logout">
+                Logout
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>

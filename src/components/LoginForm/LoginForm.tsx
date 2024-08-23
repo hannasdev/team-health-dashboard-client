@@ -6,6 +6,8 @@ import { AuthenticationService } from '../../services/AuthenticationService';
 import { ApiService } from '../../services/ApiService';
 import { LocalStorageService } from '../../services/LocalStorageService';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { LoggingService } from '../../services/LoggingService';
 
 type LoginInputs = {
   email: string;
@@ -41,13 +43,18 @@ const LoginForm: React.FC = () => {
       },
     }
   );
-  const authService = new AuthenticationService(apiService.getAxiosInstance(), localStorageService);
+  const authService = new AuthenticationService(
+    apiService.getAxiosInstance(),
+    localStorageService,
+    jwtDecode,
+    LoggingService
+  );
 
   const onSubmit = async (data: LoginInputs) => {
     try {
       setIsLoading(true);
       await authService.login(data.email, data.password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         setError(err.response.data.message || 'An error occurred during login');

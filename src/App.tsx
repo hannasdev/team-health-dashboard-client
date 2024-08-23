@@ -23,16 +23,20 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+type AppProps = {
+  router?: React.ComponentType<{ children: React.ReactNode }>;
+};
+
+function App({ router: CustomRouter = Router }: AppProps) {
   useGlobalErrorHandler((error) => {
     console.error('Global error:', error);
-    // Add logic to show a user-friendly error message
-    // Log the error to your error reporting service here
+    // TODO: Add logic to show a user-friendly error message
+    // TODO: Log the error to your error reporting service here
   });
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <CustomRouter>
         <AppLayout>
           <Suspense fallback={<CircularProgress />}>
             <Routes>
@@ -58,7 +62,7 @@ function App() {
             </Routes>
           </Suspense>
         </AppLayout>
-      </Router>
+      </CustomRouter>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

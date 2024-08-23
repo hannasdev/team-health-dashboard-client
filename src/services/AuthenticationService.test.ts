@@ -1,22 +1,25 @@
 import { AuthenticationService } from './AuthenticationService';
-import type { IAuthResponse, IUser } from '../interfaces';
+import type { IAuthenticationService, IAuthResponse, IUser } from '../interfaces';
+import {
+  createMockApiClient,
+  createMockStorageService,
+  createMockJwtDecode,
+  createMockLoggingService,
+} from '../__mocks__/mockFactories';
 
 describe('AuthenticationService', () => {
-  let authService: AuthenticationService;
-  let mockApiClient: any;
-  let mockStorage: any;
+  let authService: IAuthenticationService;
+  let mockApiClient: ReturnType<typeof createMockApiClient>;
+  let mockStorage: ReturnType<typeof createMockStorageService>;
+  let mockJwtDecode: ReturnType<typeof createMockJwtDecode>;
+  let mockLogger: ReturnType<typeof createMockLoggingService>;
 
   beforeEach(() => {
-    mockApiClient = {
-      post: jest.fn(),
-      get: jest.fn(),
-    };
-    mockStorage = {
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-    };
-    authService = new AuthenticationService(mockApiClient, mockStorage);
+    mockApiClient = createMockApiClient();
+    mockStorage = createMockStorageService();
+    mockJwtDecode = createMockJwtDecode();
+    mockLogger = createMockLoggingService();
+    authService = new AuthenticationService(mockApiClient, mockStorage, mockJwtDecode, mockLogger);
   });
 
   it('should login successfully and store tokens', async () => {
@@ -125,15 +128,61 @@ describe('AuthenticationService', () => {
   });
 
   it('should return null if refreshToken is not available in storage', async () => {
-    // Make sure there's no refreshToken in mockStorage
-    mockStorage.removeItem('refreshToken');
+    mockStorage.getItem.mockReturnValue(null); // Simulate no refresh token
 
-    mockApiClient.post = jest.fn(); // No need to provide a return value in this case
+    const result = await authService.refreshToken();
 
-    const newToken = await authService.refreshToken();
-
-    // No API call should have been made
     expect(mockApiClient.post).not.toHaveBeenCalled();
-    expect(newToken).toBeNull();
+    expect(result).toBeNull();
+  });
+
+  it('should correctly determine if a token is expired', () => {
+    const mockToken = 'mock.jwt.token';
+    const futureTime = Math.floor(Date.now() / 1000) + 3600; // 1 hour in the future
+    mockJwtDecode.mockReturnValue({ exp: futureTime });
+
+    expect(authService['isTokenExpired'](mockToken)).toBe(false);
+
+    const pastTime = Math.floor(Date.now() / 1000) - 3600; // 1 hour in the past
+    mockJwtDecode.mockReturnValue({ exp: pastTime });
+
+    expect(authService['isTokenExpired'](mockToken)).toBe(true);
+  });
+
+  it('should handle jwt decode errors', () => {
+    const mockToken = 'invalid.token';
+    mockJwtDecode.mockImplementation(() => {
+      throw new Error('Invalid token');
+    });
+
+    expect(authService['isTokenExpired'](mockToken)).toBe(true);
+  });
+
+  it('should log error when token refresh fails', async () => {
+    mockStorage.getItem.mockReturnValue('test-refresh-token');
+    mockApiClient.post.mockRejectedValue(new Error('Refresh error'));
+
+    const result = await authService.refreshToken();
+
+    expect(mockApiClient.post).toHaveBeenCalledWith('/auth/refresh', {
+      refreshToken: 'test-refresh-token',
+    });
+    expect(mockLogger.error).toHaveBeenCalledWith('Token refresh failed:', expect.any(Error));
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('accessToken');
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('refreshToken');
+    expect(result).toBeNull();
+  });
+
+  it('should log error when token decoding fails during refresh scheduling', () => {
+    mockStorage.getItem.mockReturnValue('invalid-token');
+    mockJwtDecode.mockImplementation(() => {
+      throw new Error('Invalid token');
+    });
+
+    authService['scheduleTokenRefresh']();
+
+    expect(mockLogger.error).toHaveBeenCalledWith('Error decoding token:', expect.any(Error));
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('accessToken');
+    expect(mockStorage.removeItem).toHaveBeenCalledWith('refreshToken');
   });
 });

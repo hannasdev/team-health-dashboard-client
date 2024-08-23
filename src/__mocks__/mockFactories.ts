@@ -5,6 +5,7 @@ import type {
   ILoggingService,
   IStorageService,
   IUser,
+  IAuthResponse,
 } from '../interfaces';
 
 // API and Network Mocks
@@ -44,31 +45,43 @@ export const createMockLoggingService = (): jest.Mocked<ILoggingService> => ({
 // Authentication Mocks
 export const createMockAuthenticationService = (
   isLoggedIn: boolean = false
-): jest.Mocked<IAuthenticationService> => ({
-  login: jest.fn(),
-  register: jest.fn(),
-  logout: jest.fn(),
-  getCurrentUser: jest.fn(),
-  isLoggedIn: jest.fn().mockReturnValue(isLoggedIn),
-  getAccessToken: jest.fn(),
-  refreshToken: jest.fn(),
-  setupTokenRefresh: jest.fn(),
-  refreshUserActivity: jest.fn(),
-});
+): jest.Mocked<IAuthenticationService> => {
+  const mockUser: IUser = { id: '1', email: 'test@example.com', name: 'Test User' };
+  const mockAuthResponse: IAuthResponse = {
+    user: mockUser,
+    accessToken: 'fake-access-token',
+    refreshToken: 'fake-refresh-token',
+  };
+
+  return {
+    login: jest.fn().mockResolvedValue(mockAuthResponse),
+    register: jest.fn().mockResolvedValue(mockAuthResponse),
+    logout: jest.fn(),
+    getCurrentUser: jest.fn().mockResolvedValue(mockUser),
+    isLoggedIn: jest.fn().mockReturnValue(isLoggedIn),
+    getAccessToken: jest.fn().mockReturnValue(isLoggedIn ? 'fake-access-token' : null),
+    refreshToken: jest.fn().mockResolvedValue({
+      accessToken: 'new-fake-access-token',
+      refreshToken: 'new-fake-refresh-token',
+    }),
+    setupTokenRefresh: jest.fn(),
+    refreshUserActivity: jest.fn(),
+  };
+};
 
 // Hook Mocks
 export const createMockUseAuth = (isLoggedIn: boolean = false, user: IUser | null = null) => {
   const mockAuthService = createMockAuthenticationService(isLoggedIn);
 
-  return () => ({
+  return jest.fn(() => ({
     isLoggedIn,
-    login: jest.fn(),
-    logout: jest.fn(),
-    register: jest.fn(),
-    checkLoginStatus: jest.fn(),
+    login: jest.fn<Promise<boolean>, [username: string, password: string]>(),
+    logout: jest.fn<Promise<void>, []>(),
+    register: jest.fn<Promise<boolean>, [email: string, password: string]>(),
+    checkLoginStatus: jest.fn<Promise<void>, []>(),
     user,
     authService: mockAuthService,
-  });
+  }));
 };
 
 export const createMockUseGlobalErrorHandler = () => () => ({

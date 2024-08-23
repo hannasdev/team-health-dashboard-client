@@ -10,6 +10,7 @@ import { ApiService } from '../../services/ApiService';
 import { Link as RouterLink } from 'react-router-dom';
 import { Link as MuiLink } from '@mui/material';
 import { LoggingService } from '../../services/LoggingService';
+import { jwtDecode } from 'jwt-decode';
 
 type RegisterInputs = {
   name: string;
@@ -46,7 +47,12 @@ const RegisterForm: React.FC = () => {
       },
     }
   );
-  const authService = new AuthenticationService(apiService.getAxiosInstance(), localStorageService);
+  const authService = new AuthenticationService(
+    apiService.getAxiosInstance(),
+    localStorageService,
+    jwtDecode,
+    LoggingService
+  );
 
   const onSubmit: SubmitHandler<RegisterInputs> = async (data) => {
     try {
