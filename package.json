@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "NODE_NO_WARNINGS=1 jest",
+    "test": "NODE_NO_WARNINGS=1 jest --watch",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
