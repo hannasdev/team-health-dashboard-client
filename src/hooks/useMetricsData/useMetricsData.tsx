@@ -31,7 +31,7 @@ export function useMetricsData(timePeriod: number) {
       setError(null);
 
       // Use apiService to get the SSE endpoint URL
-      const sseUrl = await apiService.get<string>('metrics/sse-url', { timePeriod });
+      const sseUrl = await apiService.get<string>('api/metrics', { timePeriod });
 
       eventSource = new EventSource(sseUrl, { withCredentials: true });
 

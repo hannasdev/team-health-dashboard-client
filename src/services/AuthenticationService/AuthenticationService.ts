@@ -17,7 +17,7 @@ export class AuthenticationService implements IAuthenticationService {
 
   public async login(email: string, password: string): Promise<IAuthResponse> {
     try {
-      const response = await this.apiClient.post<{ data: IAuthResponse }>('/auth/login', {
+      const response = await this.apiClient.post<{ data: IAuthResponse }>('/api/auth/login', {
         email,
         password,
       });
@@ -32,7 +32,7 @@ export class AuthenticationService implements IAuthenticationService {
 
   public async register(email: string, password: string): Promise<IAuthResponse> {
     try {
-      const response = await this.apiClient.post<{ data: IAuthResponse }>('/auth/register', {
+      const response = await this.apiClient.post<{ data: IAuthResponse }>('/api/auth/register', {
         email,
         password,
       });
@@ -53,7 +53,7 @@ export class AuthenticationService implements IAuthenticationService {
     try {
       const {
         data: { id, email },
-      } = await this.apiClient.get<{ data: IUser }>('/auth/me');
+      } = await this.apiClient.get<{ data: IUser }>('/api/auth/me');
       return { id, email };
     } catch {
       return null;
