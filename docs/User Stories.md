@@ -192,7 +192,7 @@ Acceptance Criteria:
 - Successful registration creates a new user account
 - User receives confirmation of successful registration
 
-### User Story 2: User Login (Priority: High, Story Points: 5)
+### User Story 2: User Login (Priority: High, Story Points: 5) - [DONE]
 
 As a registered user, I want to log in to the application so that I can view the team health metrics.
 
