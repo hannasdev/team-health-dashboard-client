@@ -1,16 +1,19 @@
 // src/hooks/useAuth.test.ts
+// src/hooks/useAuth.test.ts
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAuth } from './useAuth';
 import * as useServicesModule from './useServices';
-import { IUser } from '../interfaces';
+import type { IUser } from '../interfaces';
 import {
   createMockApiService,
   createMockLocalStorageService,
   createMockAuthenticationService,
   createMockLoggingService,
+  createMockTokenManager,
 } from '../__mocks__/mockFactories';
-import { AuthenticationService } from '../services/AuthenticationService';
-import * as LoggingServiceModule from '../services/LoggingService';
+import { AuthenticationService } from '../services/AuthenticationService/AuthenticationService';
+import * as LoggingServiceModule from '../services/LoggingService/LoggingService';
+import { TokenManager } from '../services/TokenManager/TokenManager';
 
 jest.mock('./useServices', () => ({
   useServices: jest.fn(),
@@ -18,9 +21,11 @@ jest.mock('./useServices', () => ({
 
 jest.mock('../services/AuthenticationService');
 jest.mock('../services/LoggingService');
+jest.mock('../services/TokenManager');
 
 describe('useAuth', () => {
   let mockAuthService: jest.Mocked<AuthenticationService>;
+  let mockTokenManager: jest.Mocked<TokenManager>;
   let mockUser: IUser;
   let mockLoggingService: ReturnType<typeof createMockLoggingService>;
 
@@ -28,14 +33,20 @@ describe('useAuth', () => {
     jest.clearAllMocks();
     mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
     mockAuthService = createMockAuthenticationService() as jest.Mocked<AuthenticationService>;
+    mockTokenManager = createMockTokenManager();
     mockLoggingService = createMockLoggingService();
 
     (AuthenticationService as jest.MockedClass<typeof AuthenticationService>).mockImplementation(
       () => mockAuthService
     );
+    (TokenManager as jest.MockedClass<typeof TokenManager>).mockImplementation(
+      () => mockTokenManager
+    );
     (useServicesModule.useServices as jest.Mock).mockReturnValue({
       apiService: createMockApiService(),
       localStorageService: createMockLocalStorageService(),
+      authService: mockAuthService,
+      tokenManager: mockTokenManager,
     });
 
     // Replace the LoggingService with our mock
@@ -43,7 +54,7 @@ describe('useAuth', () => {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     mockAuthService.login.mockImplementation(async () => {
-      mockAuthService.isLoggedIn.mockReturnValue(true);
+      mockTokenManager.hasValidAccessToken.mockReturnValue(true);
       return {
         user: mockUser,
         accessToken: 'fake-access-token',
@@ -53,7 +64,7 @@ describe('useAuth', () => {
   });
 
   it('should return isLoggedIn as false initially', async () => {
-    mockAuthService.isLoggedIn.mockReturnValue(false);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(false);
     const { result } = renderHook(() => useAuth());
 
     await waitFor(() => {
@@ -75,13 +86,11 @@ describe('useAuth', () => {
     });
 
     expect(mockAuthService.login).toHaveBeenCalledWith('test@example.com', 'password');
-    expect(mockAuthService.setupTokenRefresh).toHaveBeenCalled();
-    expect(mockAuthService.refreshUserActivity).toHaveBeenCalled();
   });
 
   it('should handle login failure', async () => {
     mockAuthService.login.mockRejectedValue(new Error('Login failed'));
-    mockAuthService.isLoggedIn.mockReturnValue(false);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(false);
 
     const { result } = renderHook(() => useAuth());
 
@@ -108,7 +117,7 @@ describe('useAuth', () => {
   });
 
   it('should set isLoggedIn to false after logout', async () => {
-    mockAuthService.isLoggedIn.mockReturnValue(true);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(true);
     const { result } = renderHook(() => useAuth());
 
     await waitFor(() => {
@@ -124,21 +133,19 @@ describe('useAuth', () => {
   });
 
   it('should check login status on mount', () => {
-    mockAuthService.isLoggedIn.mockReturnValue(true);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(true);
     renderHook(() => useAuth());
 
-    expect(mockAuthService.isLoggedIn).toHaveBeenCalled();
-    expect(mockAuthService.setupTokenRefresh).toHaveBeenCalled();
-    expect(mockAuthService.refreshUserActivity).toHaveBeenCalled();
+    expect(mockTokenManager.hasValidAccessToken).toHaveBeenCalled();
   });
 
   it('should update login status when storage changes', async () => {
-    mockAuthService.isLoggedIn.mockReturnValue(false);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(false);
     const { result } = renderHook(() => useAuth());
 
     expect(result.current.isLoggedIn).toBe(false);
 
-    mockAuthService.isLoggedIn.mockReturnValue(true);
+    mockTokenManager.hasValidAccessToken.mockReturnValue(true);
 
     act(() => {
       window.dispatchEvent(new Event('storage'));
@@ -147,19 +154,5 @@ describe('useAuth', () => {
     await waitFor(() => {
       expect(result.current.isLoggedIn).toBe(true);
     });
-
-    expect(mockAuthService.setupTokenRefresh).toHaveBeenCalled();
-    expect(mockAuthService.refreshUserActivity).toHaveBeenCalled();
-  });
-
-  it('should call refreshUserActivity when checkLoginStatus is called', () => {
-    mockAuthService.isLoggedIn.mockReturnValue(true);
-    const { result } = renderHook(() => useAuth());
-
-    act(() => {
-      result.current.checkLoginStatus();
-    });
-
-    expect(mockAuthService.refreshUserActivity).toHaveBeenCalled();
   });
 });

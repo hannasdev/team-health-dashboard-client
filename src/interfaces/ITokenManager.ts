@@ -1,5 +1,10 @@
+import type { ITokenPayload } from './ITokenPayload';
+
 export interface ITokenManager {
-  getToken(): string | null;
-  refreshToken(): Promise<string>;
-  setToken(token: string): void;
+  getAccessToken(): string | null;
+  getRefreshToken(): string | null;
+  refreshToken(): Promise<ITokenPayload>;
+  setTokens(accessToken: string, refreshToken: string): void;
+  clearTokens(): void;
+  hasValidAccessToken(): boolean;
 }

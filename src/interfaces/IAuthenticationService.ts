@@ -7,8 +7,4 @@ export interface IAuthenticationService {
   logout(): void;
   getCurrentUser(): Promise<IUser | null>;
   isLoggedIn(): boolean;
-  getAccessToken(): string | null;
-  refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null>;
-  setupTokenRefresh(): void;
-  refreshUserActivity(): void;
 }

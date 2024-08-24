@@ -3,7 +3,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import LoginForm from './LoginForm';
-import { AuthenticationService } from '../../services/AuthenticationService';
+import { AuthenticationService } from '../../services/AuthenticationService/AuthenticationService';
 
 jest.mock('../../services/AuthenticationService');
 

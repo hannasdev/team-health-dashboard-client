@@ -1,8 +1,6 @@
-// src/interfaces/ILoggingService.ts
-
 export interface ILoggingService {
-  log(...args: any[]): void;
-  error(...args: any[]): void;
-  warn(...args: any[]): void;
-  info(...args: any[]): void;
+  error(message: string, error?: unknown): void;
+  warn(message: string, data?: unknown): void;
+  info(message: string, data?: unknown): void;
+  log(message: string, data?: unknown): void;
 }

@@ -1,51 +1,42 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { AuthenticationService } from '../services/AuthenticationService';
+import { useState, useEffect, useCallback } from 'react';
 import { useServices } from './useServices';
-import { jwtDecode } from 'jwt-decode';
-import { LoggingService } from '../services/LoggingService';
 
 export const useAuth = () => {
-  const { apiService, localStorageService } = useServices();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const authService = useMemo(
-    () =>
-      new AuthenticationService(
-        apiService.getAxiosInstance(),
-        localStorageService,
-        jwtDecode,
-        LoggingService
-      ),
-    [apiService, localStorageService]
-  );
+  const { authService, tokenManager } = useServices();
+  const [isLoggedIn, setIsLoggedIn] = useState(tokenManager.hasValidAccessToken());
 
   const checkLoginStatus = useCallback(() => {
-    const loggedIn = authService.isLoggedIn();
+    const loggedIn = tokenManager.hasValidAccessToken();
     setIsLoggedIn(loggedIn);
-    if (loggedIn) {
-      authService.setupTokenRefresh();
-      authService.refreshUserActivity();
-    }
-  }, [authService]);
+  }, [tokenManager]);
 
   const login = useCallback(
-    async (username: string, password: string) => {
+    async (email: string, password: string) => {
       try {
-        await authService.login(username, password);
-        const loginCheck = authService.isLoggedIn();
-        setIsLoggedIn(loginCheck);
-        if (loginCheck) {
-          authService.setupTokenRefresh();
-          authService.refreshUserActivity();
-        }
-        return loginCheck;
+        await authService.login(email, password);
+        checkLoginStatus();
+        return true;
       } catch (error) {
-        LoggingService.error('Login failed:', error);
+        console.error('Login failed:', error);
         setIsLoggedIn(false);
-        return false;
+        throw error;
       }
     },
-    [authService]
+    [authService, checkLoginStatus]
+  );
+
+  const register = useCallback(
+    async (email: string, password: string) => {
+      try {
+        await authService.register(email, password);
+        checkLoginStatus();
+        return true;
+      } catch (error) {
+        console.error('Registration failed:', error);
+        throw error;
+      }
+    },
+    [authService, checkLoginStatus]
   );
 
   const logout = useCallback(() => {
@@ -55,14 +46,11 @@ export const useAuth = () => {
 
   useEffect(() => {
     checkLoginStatus();
-  }, [checkLoginStatus]);
-
-  useEffect(() => {
     window.addEventListener('storage', checkLoginStatus);
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
     };
   }, [checkLoginStatus]);
 
-  return { isLoggedIn, login, logout, authService, checkLoginStatus };
+  return { isLoggedIn, login, register, logout };
 };

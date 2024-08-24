@@ -1,4 +1,4 @@
-import { useHealthCheck } from '../hooks/useQuery';
+import { useHealthCheck } from '../hooks/useHealthCheck';
 
 const HealthCheck = () => {
   const { status, isLoading, error } = useHealthCheck();

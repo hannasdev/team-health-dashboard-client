@@ -1,8 +1,8 @@
 // src/hooks/useServices.test.ts
 import { renderHook } from '@testing-library/react';
 import { useServices } from './useServices';
-import { ApiService } from '../services/ApiService';
-import { LocalStorageService } from '../services/LocalStorageService';
+import { ApiService } from '../services/ApiService/ApiService';
+import { LocalStorageService } from '../services/LocalStorageService/LocalStorageService';
 
 jest.mock('../services/ApiService');
 jest.mock('../services/LocalStorageService');

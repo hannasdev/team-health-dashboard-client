@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { IApiErrorHandler } from '../interfaces';
+import type { IApiErrorHandler } from '../../interfaces';
 
 export class ApiErrorHandler implements IApiErrorHandler {
   public handleError(error: unknown): void {

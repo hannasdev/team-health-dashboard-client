@@ -1,23 +1,65 @@
-// src/__mocks__/mockFactories.ts
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, HeadersDefaults, AxiosDefaults, AxiosHeaderValue } from 'axios';
 import type {
   IAuthenticationService,
   ILoggingService,
   IStorageService,
   IUser,
   IAuthResponse,
+  ITokenManager,
+  ITokenPayload,
+  IApiClient,
+  IJwtDecoder,
 } from '../interfaces';
+import { TokenManager } from '../services/TokenManager/TokenManager';
 
 // API and Network Mocks
-export const createMockApiClient = (): jest.Mocked<AxiosInstance> =>
-  ({
-    get: jest.fn(),
-    post: jest.fn(),
-    put: jest.fn(),
-    delete: jest.fn(),
+export const createMockAxiosInstance = (): jest.Mocked<AxiosInstance> => {
+  const mockAxios: jest.Mocked<AxiosInstance> = {
+    get: jest.fn().mockResolvedValue({ data: {} }),
+    post: jest.fn().mockResolvedValue({ data: {} }),
+    put: jest.fn().mockResolvedValue({ data: {} }),
+    delete: jest.fn().mockResolvedValue({ data: {} }),
     patch: jest.fn(),
     request: jest.fn(),
-  }) as any;
+    getUri: jest.fn(),
+    head: jest.fn(),
+    options: jest.fn(),
+    postForm: jest.fn(),
+    putForm: jest.fn(),
+    patchForm: jest.fn(),
+    interceptors: {
+      request: {
+        use: jest.fn(),
+        eject: jest.fn(),
+        clear: jest.fn(),
+      },
+      response: {
+        use: jest.fn(),
+        eject: jest.fn(),
+        clear: jest.fn(),
+      },
+    },
+    defaults: {
+      headers: {
+        common: { 'Content-Type': 'application/json' },
+        delete: {},
+        get: {},
+        head: {},
+        post: {},
+        put: {},
+        patch: {},
+      } as HeadersDefaults & { [key: string]: AxiosHeaderValue },
+    } as AxiosDefaults,
+  } as unknown as jest.Mocked<AxiosInstance>;
+
+  // Add the call signature
+  (mockAxios as any).call = jest.fn();
+  (mockAxios as any).apply = jest.fn();
+
+  return mockAxios;
+};
+
+export const createMockApiClient = createMockAxiosInstance;
 
 export const createMockApiService = () => ({
   getAxiosInstance: jest.fn(() => createMockApiClient()),
@@ -36,10 +78,10 @@ export const createMockLocalStorageService = createMockStorageService;
 export const createMockJwtDecode = (): jest.Mock => jest.fn();
 
 export const createMockLoggingService = (): jest.Mocked<ILoggingService> => ({
-  log: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
+  log: jest.fn(),
 });
 
 // Authentication Mocks
@@ -56,16 +98,9 @@ export const createMockAuthenticationService = (
   return {
     login: jest.fn().mockResolvedValue(mockAuthResponse),
     register: jest.fn().mockResolvedValue(mockAuthResponse),
-    logout: jest.fn(),
+    logout: jest.fn().mockResolvedValue(undefined),
     getCurrentUser: jest.fn().mockResolvedValue(mockUser),
     isLoggedIn: jest.fn().mockReturnValue(isLoggedIn),
-    getAccessToken: jest.fn().mockReturnValue(isLoggedIn ? 'fake-access-token' : null),
-    refreshToken: jest.fn().mockResolvedValue({
-      accessToken: 'new-fake-access-token',
-      refreshToken: 'new-fake-refresh-token',
-    }),
-    setupTokenRefresh: jest.fn(),
-    refreshUserActivity: jest.fn(),
   };
 };
 
@@ -75,10 +110,14 @@ export const createMockUseAuth = (isLoggedIn: boolean = false, user: IUser | nul
 
   return jest.fn(() => ({
     isLoggedIn,
-    login: jest.fn<Promise<boolean>, [username: string, password: string]>(),
-    logout: jest.fn<Promise<void>, []>(),
-    register: jest.fn<Promise<boolean>, [email: string, password: string]>(),
-    checkLoginStatus: jest.fn<Promise<void>, []>(),
+    login: jest
+      .fn<Promise<boolean>, [username: string, password: string]>()
+      .mockResolvedValue(true),
+    logout: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
+    register: jest
+      .fn<Promise<boolean>, [email: string, password: string]>()
+      .mockResolvedValue(true),
+    checkLoginStatus: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
     user,
     authService: mockAuthService,
   }));
@@ -95,3 +134,41 @@ export const createMockUseIdleTimeout = () => () => ({
   resetIdleTimer: jest.fn(),
   logoutUser: jest.fn(),
 });
+
+export const createMockErrorHandler = () => ({
+  handleError: jest.fn(),
+});
+
+export function createMockTokenManager(
+  overrides: Partial<ITokenManager> = {}
+): jest.Mocked<TokenManager> {
+  const mockStorageService = createMockStorageService();
+  const mockApiClient: jest.Mocked<IApiClient> = {
+    get: jest.fn().mockResolvedValue({ data: {} }),
+    post: jest.fn().mockResolvedValue({ data: {} }),
+    put: jest.fn().mockResolvedValue({ data: {} }),
+    delete: jest.fn().mockResolvedValue({ data: {} }),
+  };
+  const mockJwtDecoder: jest.Mocked<IJwtDecoder> = {
+    decode: jest.fn().mockReturnValue({ exp: Date.now() / 1000 + 3600 }),
+  };
+
+  const mockTokenManager = new TokenManager(
+    mockStorageService,
+    mockApiClient,
+    mockJwtDecoder
+  ) as jest.Mocked<TokenManager>;
+
+  // Mock the public methods
+  Object.assign(mockTokenManager, {
+    getAccessToken: jest.fn().mockReturnValue(null),
+    getRefreshToken: jest.fn().mockReturnValue(null),
+    refreshToken: jest.fn().mockResolvedValue({} as ITokenPayload),
+    setTokens: jest.fn(),
+    clearTokens: jest.fn(),
+    hasValidAccessToken: jest.fn().mockReturnValue(false),
+    ...overrides,
+  });
+
+  return mockTokenManager;
+}

@@ -1,5 +1,5 @@
 // src/services/LoggingService.ts
-import type { ILoggingService } from '../interfaces/ILoggingService';
+import type { ILoggingService } from '../../interfaces';
 
 export const LoggingService: ILoggingService = {
   log(...args: any[]): void {

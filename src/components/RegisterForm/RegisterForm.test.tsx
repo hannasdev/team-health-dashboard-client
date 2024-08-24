@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import RegisterForm from './RegisterForm';
-import { AuthenticationService } from '../../services/AuthenticationService';
-import { LoggingService } from '../../services/LoggingService';
+import { AuthenticationService } from '../../services/AuthenticationService/AuthenticationService';
+import { LoggingService } from '../../services/LoggingService/LoggingService';
 
 // Mock dependencies
 jest.mock('react-router-dom', () => ({

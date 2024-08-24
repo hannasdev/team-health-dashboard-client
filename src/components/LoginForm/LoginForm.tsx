@@ -2,12 +2,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { TextField, Button, Box, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { AuthenticationService } from '../../services/AuthenticationService';
-import { ApiService } from '../../services/ApiService';
-import { LocalStorageService } from '../../services/LocalStorageService';
-import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
-import { LoggingService } from '../../services/LoggingService';
+import { Link as RouterLink } from 'react-router-dom';
+import { Link as MuiLink } from '@mui/material';
+import { useAuth } from '../../hooks/useAuth';
 
 type LoginInputs = {
   email: string;
@@ -23,44 +20,16 @@ const LoginForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  const localStorageService = new LocalStorageService();
-  const apiService = new ApiService(
-    '/api',
-    {
-      handleError: (error) => {
-        console.error('API Error:', error);
-      },
-    },
-    {
-      getToken: () => localStorageService.getItem('token'),
-      setToken: (token) => {
-        localStorageService.setItem('token', token);
-      },
-      refreshToken: async () => {
-        console.log('Token refresh not implemented yet');
-        return Promise.resolve('');
-      },
-    }
-  );
-  const authService = new AuthenticationService(
-    apiService.getAxiosInstance(),
-    localStorageService,
-    jwtDecode,
-    LoggingService
-  );
+  const { login } = useAuth();
 
   const onSubmit = async (data: LoginInputs) => {
     try {
       setIsLoading(true);
-      await authService.login(data.email, data.password);
+      setError(null);
+      await login(data.email, data.password);
       navigate('/');
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || 'An error occurred during login');
-      } else {
-        setError('Network error. Please try again.');
-      }
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +77,11 @@ const LoginForm: React.FC = () => {
       >
         {isLoading ? 'Signing In...' : 'Sign In'}
       </Button>
+      <Box mt={2} textAlign="center">
+        <MuiLink component={RouterLink} to="/register">
+          Don't have an account? Sign up
+        </MuiLink>
+      </Box>
     </Box>
   );
 };

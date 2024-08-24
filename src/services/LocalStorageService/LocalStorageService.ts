@@ -1,4 +1,4 @@
-import type { IStorageService } from '../interfaces';
+import type { IStorageService } from '../../interfaces';
 
 export class LocalStorageService implements IStorageService {
   public getItem(key: string): string | null {

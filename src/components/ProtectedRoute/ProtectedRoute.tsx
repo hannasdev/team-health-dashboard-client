@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { LocalStorageService } from '../../services/LocalStorageService';
+import { LocalStorageService } from '../../services/LocalStorageService/LocalStorageService';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
