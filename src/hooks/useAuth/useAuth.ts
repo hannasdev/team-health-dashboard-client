@@ -3,7 +3,10 @@ import { useServices } from '../useServices';
 
 export const useAuth = () => {
   const { authService, tokenManager } = useServices();
-  const [isLoggedIn, setIsLoggedIn] = useState(tokenManager.hasValidAccessToken());
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const loggedIn = tokenManager.hasValidAccessToken();
+    return loggedIn;
+  });
 
   const checkLoginStatus = useCallback(() => {
     const loggedIn = tokenManager.hasValidAccessToken();
@@ -43,6 +46,14 @@ export const useAuth = () => {
     authService.logout();
     setIsLoggedIn(false);
   }, [authService]);
+
+  useEffect(() => {
+    checkLoginStatus();
+    const intervalId = setInterval(checkLoginStatus, 60000); // Check every minute
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [checkLoginStatus]);
 
   useEffect(() => {
     checkLoginStatus();
