@@ -1,24 +1,42 @@
 // src/components/Dashboard/Dashboard.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { Typography, Box, CircularProgress, Alert, Grid } from '@mui/material';
 import { useMetricsData } from '../../hooks/useMetricsData';
 import MetricChart from './MetricChart';
 
 const Dashboard: React.FC = () => {
-  const [timePeriod] = useState(7);
-  const { metrics, loading, error } = useMetricsData(timePeriod);
+  const { metrics, loading, error, progress } = useMetricsData(90); // Default to 90 days
 
   if (loading) {
-    return <CircularProgress />;
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <CircularProgress />
+        {progress && (
+          <Typography variant="body2" mt={2}>
+            {progress.message} ({progress.progress}%)
+          </Typography>
+        )}
+      </Box>
+    );
   }
 
   if (error) {
     return <Alert severity="error">Error loading metrics: {error.message}</Alert>;
   }
 
-  if (!metrics) {
+  if (!metrics || metrics.length === 0) {
     return <Alert severity="info">No metrics data available.</Alert>;
   }
+
+  // Group metrics by category
+  const groupedMetrics = metrics.reduce<Record<string, typeof metrics>>((acc, metric) => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!acc[metric.metric_category]) {
+      acc[metric.metric_category] = [];
+    }
+    acc[metric.metric_category].push(metric);
+    return acc;
+  }, {});
 
   return (
     <Box>
@@ -26,18 +44,11 @@ const Dashboard: React.FC = () => {
         Team Health Dashboard
       </Typography>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <MetricChart title="Commit Activity" data={metrics} dataKey="commits" color="#8884d8" />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <MetricChart
-            title="Pull Requests"
-            data={metrics}
-            dataKey="pullRequests"
-            color="#82ca9d"
-          />
-        </Grid>
-        {/* Add more MetricChart components as needed */}
+        {Object.entries(groupedMetrics).map(([category, categoryMetrics]) => (
+          <Grid item xs={12} md={6} key={category}>
+            <MetricChart title={category} data={categoryMetrics} dataKey="value" color="#8884d8" />
+          </Grid>
+        ))}
       </Grid>
     </Box>
   );
