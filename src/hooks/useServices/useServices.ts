@@ -1,13 +1,13 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { useMemo } from 'react';
-import { ApiErrorHandler } from '../services/ApiErrorHandler/ApiErrorHandler';
-import { ApiService } from '../services/ApiService/ApiService';
-import { AuthenticationService } from '../services/AuthenticationService/AuthenticationService';
-import { LocalStorageService } from '../services/LocalStorageService/LocalStorageService';
-import { LoggingService } from '../services/LoggingService/LoggingService';
-import { TokenManager } from '../services/TokenManager/TokenManager';
-import type { IJwtDecoder } from '../interfaces';
+import { ApiErrorHandler } from '../../services/ApiErrorHandler';
+import { ApiService } from '../../services/ApiService';
+import { AuthenticationService } from '../../services/AuthenticationService';
+import { LocalStorageService } from '../../services/LocalStorageService';
+import { LoggingService } from '../../services/LoggingService';
+import { TokenManager } from '../../services/TokenManager';
+import type { IJwtDecoder } from '../../interfaces';
 
 export const useServices = () => {
   const localStorageService = useMemo(() => new LocalStorageService(), []);

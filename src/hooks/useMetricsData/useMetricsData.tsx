@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useServices } from './useServices';
-import { useAuth } from './useAuth';
+import { useServices } from '../useServices';
+import { useAuth } from '../useAuth';
 
 interface MetricsData {
   // Define the structure of your metrics data here

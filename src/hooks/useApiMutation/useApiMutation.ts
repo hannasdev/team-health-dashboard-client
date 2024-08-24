@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-import { useServices } from './useServices';
+import { useServices } from '../useServices';
 
 export function useApiMutation<T, S extends Record<string, unknown>>(
   url: string,

@@ -1,40 +1,33 @@
-// src/hooks/useAuth.test.ts
-// src/hooks/useAuth.test.ts
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAuth } from './useAuth';
-import * as useServicesModule from './useServices';
-import type { IUser } from '../interfaces';
+import * as useServicesModule from '../useServices';
 import {
   createMockApiService,
   createMockLocalStorageService,
   createMockAuthenticationService,
-  createMockLoggingService,
   createMockTokenManager,
-} from '../__mocks__/mockFactories';
-import { AuthenticationService } from '../services/AuthenticationService/AuthenticationService';
-import * as LoggingServiceModule from '../services/LoggingService/LoggingService';
-import { TokenManager } from '../services/TokenManager/TokenManager';
+} from '../../__mocks__/mockFactories';
+import { AuthenticationService } from '../../services/AuthenticationService';
+import { TokenManager } from '../../services/TokenManager';
 
 jest.mock('./useServices', () => ({
   useServices: jest.fn(),
 }));
 
-jest.mock('../services/AuthenticationService/AuthenticationService');
-jest.mock('../services/LoggingService/LoggingService');
-jest.mock('../services/TokenManager/TokenManager');
+jest.mock('../services/AuthenticationService');
+jest.mock('../services/LoggingService');
+jest.mock('../services/TokenManager');
 
 describe('useAuth', () => {
   let mockAuthService: jest.Mocked<AuthenticationService>;
   let mockTokenManager: jest.Mocked<TokenManager>;
-  let mockUser: IUser;
-  let mockLoggingService: ReturnType<typeof createMockLoggingService>;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
+
     mockAuthService = createMockAuthenticationService() as jest.Mocked<AuthenticationService>;
     mockTokenManager = createMockTokenManager();
-    mockLoggingService = createMockLoggingService();
 
     (AuthenticationService as jest.MockedClass<typeof AuthenticationService>).mockImplementation(
       () => mockAuthService
@@ -49,18 +42,11 @@ describe('useAuth', () => {
       tokenManager: mockTokenManager,
     });
 
-    // Replace the LoggingService with our mock
-    Object.assign(LoggingServiceModule.LoggingService, mockLoggingService);
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
 
-    // eslint-disable-next-line @typescript-eslint/require-await
-    mockAuthService.login.mockImplementation(async () => {
-      mockTokenManager.hasValidAccessToken.mockReturnValue(true);
-      return {
-        user: mockUser,
-        accessToken: 'fake-access-token',
-        refreshToken: 'fake-refresh-token',
-      };
-    });
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('should return isLoggedIn as false initially', async () => {
@@ -73,12 +59,14 @@ describe('useAuth', () => {
   });
 
   it('should set isLoggedIn to true after successful login', async () => {
+    mockTokenManager.hasValidAccessToken.mockReturnValue(false);
     const { result } = renderHook(() => useAuth());
 
     expect(result.current.isLoggedIn).toBe(false);
 
     await act(async () => {
-      await result.current.login('test@example.com', 'password');
+      const loginResult = await result.current.login('test@example.com', 'password');
+      expect(loginResult).toBe(true);
     });
 
     await waitFor(() => {
@@ -89,31 +77,50 @@ describe('useAuth', () => {
   });
 
   it('should handle login failure', async () => {
-    mockAuthService.login.mockRejectedValue(new Error('Login failed'));
+    const loginError = new Error('Login failed');
+    mockAuthService.login.mockRejectedValue(loginError);
     mockTokenManager.hasValidAccessToken.mockReturnValue(false);
 
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      const loginResult = await result.current.login('test@example.com', 'wrongpassword');
-      expect(loginResult).toBe(false);
+      await expect(result.current.login('test@example.com', 'wrongpassword')).rejects.toThrow(
+        'Login failed'
+      );
     });
 
     expect(result.current.isLoggedIn).toBe(false);
     expect(mockAuthService.login).toHaveBeenCalledWith('test@example.com', 'wrongpassword');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Login failed:', loginError);
   });
 
-  it('should log error when login fails', async () => {
-    mockAuthService.login.mockRejectedValue(new Error('Login failed'));
+  it('should handle successful registration', async () => {
+    mockTokenManager.hasValidAccessToken.mockReturnValue(true);
+    const { result } = renderHook(() => useAuth());
+
+    await act(async () => {
+      const registerResult = await result.current.register('test@example.com', 'password');
+      expect(registerResult).toBe(true);
+    });
+
+    expect(mockAuthService.register).toHaveBeenCalledWith('test@example.com', 'password');
+    expect(result.current.isLoggedIn).toBe(true);
+  });
+
+  it('should handle registration failure', async () => {
+    const registerError = new Error('Registration failed');
+    mockAuthService.register.mockRejectedValue(registerError);
 
     const { result } = renderHook(() => useAuth());
 
     await act(async () => {
-      await result.current.login('test@example.com', 'wrong-password');
+      await expect(result.current.register('test@example.com', 'password')).rejects.toThrow(
+        'Registration failed'
+      );
     });
 
-    expect(mockLoggingService.error).toHaveBeenCalledWith('Login failed:', expect.any(Error));
-    expect(result.current.isLoggedIn).toBe(false);
+    expect(mockAuthService.register).toHaveBeenCalledWith('test@example.com', 'password');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Registration failed:', registerError);
   });
 
   it('should set isLoggedIn to false after logout', async () => {

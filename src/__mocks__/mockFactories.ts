@@ -10,7 +10,7 @@ import type {
   IApiClient,
   IJwtDecoder,
 } from '../interfaces';
-import { TokenManager } from '../services/TokenManager/TokenManager';
+import { TokenManager } from '../services/TokenManager';
 
 // API and Network Mocks
 export const createMockAxiosInstance = (): jest.Mocked<AxiosInstance> => {

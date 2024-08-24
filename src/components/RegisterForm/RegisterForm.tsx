@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
 import { Link as MuiLink } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
-import { LoggingService } from '../../services/LoggingService/LoggingService';
+import { LoggingService } from '../../services/LoggingService';
 
 type RegisterInputs = {
   email: string;

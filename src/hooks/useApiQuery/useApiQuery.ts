@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { UseQueryOptions, UseQueryResult, QueryKey } from '@tanstack/react-query';
-import { useServices } from './useServices';
+import { useServices } from '../useServices';
 
 export function useApiQuery<T>(
   key: QueryKey,
