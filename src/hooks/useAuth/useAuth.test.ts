@@ -10,13 +10,13 @@ import {
 import { AuthenticationService } from '../../services/AuthenticationService';
 import { TokenManager } from '../../services/TokenManager';
 
-jest.mock('./useServices', () => ({
+jest.mock('../useServices', () => ({
   useServices: jest.fn(),
 }));
 
-jest.mock('../services/AuthenticationService');
-jest.mock('../services/LoggingService');
-jest.mock('../services/TokenManager');
+jest.mock('../../services/AuthenticationService');
+jest.mock('../../services/LoggingService');
+jest.mock('../../services/TokenManager');
 
 describe('useAuth', () => {
   let mockAuthService: jest.Mocked<AuthenticationService>;

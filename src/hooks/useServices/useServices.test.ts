@@ -1,11 +1,11 @@
 // src/hooks/useServices.test.ts
 import { renderHook } from '@testing-library/react';
-import { useServices } from '../useServices';
+import { useServices } from './useServices';
 import { ApiService } from '../../services/ApiService';
 import { LocalStorageService } from '../../services/LocalStorageService';
 
-jest.mock('../services/ApiService');
-jest.mock('../services/LocalStorageService');
+jest.mock('../../services/ApiService');
+jest.mock('../../services/LocalStorageService');
 
 describe('useServices', () => {
   it('should return apiService and localStorageService', () => {
