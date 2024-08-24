@@ -32,7 +32,7 @@ export class TokenManager implements ITokenManager {
       throw new Error('No refresh token available');
     }
 
-    const response = await this.apiClient.post<{ data: ITokenPayload }>('/auth/refresh', {
+    const response = await this.apiClient.post<{ data: ITokenPayload }>('/api/auth/refresh', {
       refreshToken,
     });
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

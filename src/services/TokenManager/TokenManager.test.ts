@@ -54,7 +54,7 @@ describe('TokenManager', () => {
       const result = await tokenManager.refreshToken();
 
       expect(result).toEqual(mockTokenPayload);
-      expect(mockApiClient.post).toHaveBeenCalledWith('/auth/refresh', {
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/auth/refresh', {
         refreshToken: 'old-refresh-token',
       });
       expect(mockStorageService.setItem).toHaveBeenCalledWith('accessToken', 'new-access-token');
