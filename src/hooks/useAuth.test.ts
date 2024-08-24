@@ -19,9 +19,9 @@ jest.mock('./useServices', () => ({
   useServices: jest.fn(),
 }));
 
-jest.mock('../services/AuthenticationService');
-jest.mock('../services/LoggingService');
-jest.mock('../services/TokenManager');
+jest.mock('../services/AuthenticationService/AuthenticationService');
+jest.mock('../services/LoggingService/LoggingService');
+jest.mock('../services/TokenManager/TokenManager');
 
 describe('useAuth', () => {
   let mockAuthService: jest.Mocked<AuthenticationService>;

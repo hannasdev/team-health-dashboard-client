@@ -62,8 +62,8 @@ export class TokenManager implements ITokenManager {
 
   private isTokenExpired(token: string): boolean {
     try {
-      const decoded = this.jwtDecoder.decode(token);
-      return (decoded as JwtPayload).exp < Date.now() / 1000;
+      const decoded = this.jwtDecoder.decode(token) as JwtPayload;
+      return typeof decoded.exp === 'number' && decoded.exp < Date.now() / 1000;
     } catch {
       return true;
     }

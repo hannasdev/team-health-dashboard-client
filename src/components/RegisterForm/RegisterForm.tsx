@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
 import { Link as MuiLink } from '@mui/material';
 import { useAuth } from '../../hooks/useAuth';
+import { LoggingService } from '../../services/LoggingService/LoggingService';
 
 type RegisterInputs = {
   email: string;
@@ -31,7 +32,9 @@ const RegisterForm: React.FC = () => {
         navigate('/');
       }, 2000); // Redirect after 2 seconds
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
+      LoggingService.error('Registration error:', err);
     }
   };
 

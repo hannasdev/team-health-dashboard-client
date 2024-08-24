@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import { AuthenticationService } from '../../services/AuthenticationService/AuthenticationService';
 
-jest.mock('../../services/AuthenticationService');
+jest.mock('../../services/AuthenticationService/AuthenticationService');
 
 describe('LoginForm', () => {
   it('submits the form with valid inputs', async () => {

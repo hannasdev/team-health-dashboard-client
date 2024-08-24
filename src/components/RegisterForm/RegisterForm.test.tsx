@@ -1,8 +1,9 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import RegisterForm from './RegisterForm';
-import { AuthenticationService } from '../../services/AuthenticationService/AuthenticationService';
 import { LoggingService } from '../../services/LoggingService/LoggingService';
+import * as useAuthModule from '../../hooks/useAuth';
 
 // Mock dependencies
 jest.mock('react-router-dom', () => ({
@@ -10,14 +11,18 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
 }));
 
-jest.mock('../../services/AuthenticationService');
-jest.mock('../../services/LocalStorageService');
-jest.mock('../../services/ApiService');
-jest.mock('../../services/LoggingService');
+jest.mock('../../services/LoggingService/LoggingService');
+jest.mock('../../hooks/useAuth');
 
 describe('RegisterForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAuthModule.useAuth as jest.Mock).mockReturnValue({
+      register: jest.fn(),
+      isLoggedIn: false,
+      login: jest.fn(),
+      logout: jest.fn(),
+    });
   });
 
   const renderComponent = () =>
@@ -51,10 +56,13 @@ describe('RegisterForm', () => {
   });
 
   it('submits form with valid inputs', async () => {
-    const mockRegister = jest.fn().mockResolvedValue({});
-    (AuthenticationService as jest.Mock).mockImplementation(() => ({
+    const mockRegister = jest.fn().mockResolvedValue(true);
+    (useAuthModule.useAuth as jest.Mock).mockReturnValue({
       register: mockRegister,
-    }));
+      isLoggedIn: false,
+      login: jest.fn(),
+      logout: jest.fn(),
+    });
 
     renderComponent();
     const emailInput = screen.getByLabelText(/email address/i);
@@ -73,12 +81,12 @@ describe('RegisterForm', () => {
 
   it('displays error message on registration failure', async () => {
     const mockRegister = jest.fn().mockRejectedValue(new Error('Registration failed'));
-    (AuthenticationService as jest.Mock).mockImplementation(() => ({
+    (useAuthModule.useAuth as jest.Mock).mockReturnValue({
       register: mockRegister,
-    }));
-
-    // Mock the error method of LoggingService
-    (LoggingService.error as jest.Mock).mockImplementation(() => {});
+      isLoggedIn: false,
+      login: jest.fn(),
+      logout: jest.fn(),
+    });
 
     renderComponent();
     const emailInput = screen.getByLabelText(/email address/i);
@@ -90,7 +98,7 @@ describe('RegisterForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/an unexpected error occurred/i)).toBeInTheDocument();
+      expect(screen.getByText(/Registration failed/i)).toBeInTheDocument();
       expect(LoggingService.error).toHaveBeenCalledWith('Registration error:', expect.any(Error));
     });
   });
