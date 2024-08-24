@@ -1,18 +1,18 @@
 // src/App.tsx
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AppLayout from './AppLayout';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useGlobalErrorHandler } from './hooks/useGlobalErrorHandler';
-import { Suspense, lazy } from 'react';
 import { CircularProgress } from '@mui/material';
-import NotFound from './pages/NotFound';
+import AppLayout from './AppLayout';
+import { useGlobalErrorHandler } from './hooks/useGlobalErrorHandler';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const HealthCheck = lazy(() => import('./pages/HealthCheck'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,8 +48,8 @@ function App({ router: CustomRouter = Router }: AppProps) {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route
                 path="/healthcheck"
                 element={
