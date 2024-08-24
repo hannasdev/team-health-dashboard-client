@@ -57,14 +57,17 @@ export class TokenManager implements ITokenManager {
 
   public hasValidAccessToken(): boolean {
     const token = this.getAccessToken();
-    return !!token && !this.isTokenExpired(token);
+    const isValid = !!token && !this.isTokenExpired(token);
+    return isValid;
   }
 
   private isTokenExpired(token: string): boolean {
     try {
       const decoded = this.jwtDecoder.decode(token) as JwtPayload;
-      return typeof decoded.exp === 'number' && decoded.exp < Date.now() / 1000;
-    } catch {
+      const isExpired = typeof decoded.exp === 'number' && decoded.exp < Date.now() / 1000;
+      return isExpired;
+    } catch (error) {
+      console.error('Error decoding token:', error);
       return true;
     }
   }
