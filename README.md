@@ -32,51 +32,133 @@ Additional types are not mandated by the Conventional Commits specification, and
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Vite Template
+## Architecture
 
-Currently, two official plugins are available:
+```mermaid
+classDiagram
+    App *-- ErrorBoundary
+    App *-- AppLayout
+    App *-- QueryClientProvider
+    App *-- Router
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+    AppLayout *-- Dashboard
+    AppLayout *-- Login
+    AppLayout *-- Register
+    AppLayout *-- HealthCheck
 
-## Expanding the ESLint configuration
+    Dashboard *-- MetricChart
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+    class App {
+        +render()
+    }
 
-- Configure the top-level `parserOptions` property like this:
+    class ErrorBoundary {
+        +handleError(error, info)
+        +render()
+    }
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
-```
+    class AppLayout {
+        -isLoggedIn: boolean
+        -logout(): void
+        +render()
+    }
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+    class Dashboard {
+        -metrics: any[]
+        -loading: boolean
+        -error: Error
+        +render()
+    }
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
+    class MetricChart {
+        +title: string
+        +data: any[]
+        +dataKey: string
+        +color: string
+        +render()
+    }
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
+    class Login {
+        -error: string
+        -isLoading: boolean
+        +onSubmit(data)
+        +render()
+    }
+
+    class Register {
+        -error: string
+        -success: boolean
+        +onSubmit(data)
+        +render()
+    }
+
+    class HealthCheck {
+        -status: any
+        -isLoading: boolean
+        -error: Error
+        +render()
+    }
+
+    class QueryClientProvider {
+        +queryClient: QueryClient
+    }
+
+    class Router {
+        +routes: Route[]
+    }
+
+    %% Hooks
+    class useAuth {
+        +isLoggedIn: boolean
+        +login(email, password): Promise
+        +logout(): void
+        +register(email, password): Promise
+    }
+
+    class useMetricsData {
+        +metrics: any[]
+        +loading: boolean
+        +error: Error
+    }
+
+    class useHealthCheck {
+        +status: any
+        +isLoading: boolean
+        +error: Error
+    }
+
+    %% Services
+    class AuthenticationService {
+        +login(email, password): Promise
+        +register(email, password): Promise
+        +logout(): void
+        +getCurrentUser(): Promise
+        +isLoggedIn(): boolean
+    }
+
+    class ApiService {
+        +get(url, params): Promise
+        +post(url, data): Promise
+        +put(url, data): Promise
+        +delete(url): Promise
+    }
+
+    class TokenManager {
+        +getAccessToken(): string
+        +getRefreshToken(): string
+        +refreshToken(): Promise
+        +setTokens(accessToken, refreshToken): void
+        +clearTokens(): void
+        +hasValidAccessToken(): boolean
+    }
+
+    Dashboard --> useMetricsData
+    Login --> useAuth
+    Register --> useAuth
+    HealthCheck --> useHealthCheck
+    useAuth --> AuthenticationService
+    AuthenticationService --> ApiService
+    AuthenticationService --> TokenManager
+    useMetricsData --> ApiService
+    useHealthCheck --> ApiService
 ```
