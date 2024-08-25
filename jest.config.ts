@@ -10,6 +10,24 @@ const jestConfig: JestConfigWithTsJest = {
       {
         tsconfig: './tsconfig.test.json',
         jsx: 'react-jsx',
+        diagnostics: {
+          ignoreCodes: [1343],
+        },
+        astTransformers: {
+          before: [
+            {
+              path: 'node_modules/ts-jest-mock-import-meta',
+              options: {
+                metaObjectReplacement: {
+                  env: {
+                    // Replicate as .env.local
+                    VITE_API_PATH: 'http://localhost:3000',
+                  },
+                },
+              },
+            },
+          ],
+        },
       },
     ],
   },
