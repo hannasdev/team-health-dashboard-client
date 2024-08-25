@@ -5,7 +5,8 @@
 /dist
 /public
 package-lock.json
-**/*test.ts*
-**/*test.tsx*
+**/_test.ts_
+**/_test.tsx_
 *.tsbuildinfo
 *.md
+*.svg
