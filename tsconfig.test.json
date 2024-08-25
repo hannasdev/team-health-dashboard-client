@@ -3,7 +3,7 @@
   "compilerOptions": {
     "verbatimModuleSyntax": false,
     "esModuleInterop": true,
-    "module": "CommonJS",
+    "module": "commonjs",
     "jsx": "react-jsx",
     "types": ["jest", "node"]
   },
